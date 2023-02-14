@@ -2,7 +2,7 @@ library(tidyverse)
 
 
 # load data 
-ts_raw <- read.csv("outputs/2023-01-28_trials_anonymized_an-exp1_n-97.csv")
+ts_raw <- read.csv("data_raw_n97/2023-01-28_trials_anonymized_an-exp1_n-97.csv")
 
 # Learning phase ####
 ts_learning <- ts_raw %>% select(participant_id, fsm_number, trial_number, state_current, response_current, state_next, 
@@ -89,7 +89,7 @@ ts_explanation <- ts_raw %>% filter(test_explanation_counter >=0 &
                                  !(is.na(response))) %>% 
   select(participant_id, fsm_number, trial_number = test_explanation_counter, trial_type = exp_type, 
          state_1, response_1, state_2, response_2, state_3, explanation_1_decrease, explanation_2_decrease,
-         explanation_correct, response, response_correct = correct) %>% 
+         explanation_correct, response, response_correct = correct, option_1_p, option_2_p) %>% 
   mutate(fsm_type = ifelse(fsm_number == 21, "easy", "hard"),
          trial_id = ifelse(trial_type == "visible", 
                             paste0(fsm_type,"_e_vis_", state_1, response_1, state_2, response_2, state_3), 

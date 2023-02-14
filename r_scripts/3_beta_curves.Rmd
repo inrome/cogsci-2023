@@ -1,0 +1,184 @@
+---
+title: "Mental Model Analysis Visualization"
+output: html_notebook
+---
+
+
+```{r}
+library(tidyverse)
+library(ggrepel)
+
+library(tidyquant)
+library(ggdist)
+library(ggthemes)
+
+betas <- read.csv(file = "../outputs/results_mm_running.csv")
+betas <- betas %>% mutate(sum_log_p_mean_times14 = sum_log_p/count*14)
+betas_labels <- betas %>% group_by(task, condition, fsm) %>% summarize(p_max = max(sum_log_p_mean_times14), 
+                                                       p_zero = first(sum_log_p_mean_times14[beta == 0]), #!!!! maybe mistake here
+                                                       p_boost = p_max - p_zero, 
+                                                       beta_max = beta[sum_log_p_mean_times14 == p_max]) %>% arrange(desc(p_boost))
+betas <- betas %>% left_join(betas_labels) %>% 
+  mutate(Label = ifelse(beta == beta_max, paste0("β = ", beta_max, "; ", round(p_boost, 2)), NA), 
+         condition = fct_relevel(condition, c("visible_beta", "hidden_beta", "hidden_an")), 
+         condition = fct_recode(condition, "Visible" = "visible_beta", "Hidden" = "hidden_beta", "Hidden AN" = "hidden_beta_an"), 
+         task = fct_recode(task, "Control" = 'control', "Prediction" = "prediction", "Explanation" = "explanation"), 
+         task = fct_relevel(task, c("Prediction", "Explanation", "Control")))
+
+easy <- betas %>% filter(fsm == "easy")
+hard <- betas %>% filter(fsm == "hard")
+ggplot(easy, aes(beta, sum_log_p_mean_times14, color = task)) +
+  geom_line() + theme_classic() +
+   scale_color_manual(values = c("Prediction" = "#AA4499", "Explanation" = "#6699CC", "Control" = "#999933")) +
+   geom_label_repel(aes(label = Label), size = 3.2, force = 5, alpha = 0.8) +
+   facet_grid(.~condition) + xlab("Beta") + ylab("Probability of answers")
+```
+
+```{r}
+ggplot(hard, aes(beta, sum_log_p_mean_times14, color = task)) +
+  geom_line() + theme_classic() +
+   scale_color_manual(values = c("Prediction" = "#AA4499", "Explanation" = "#6699CC", "Control" = "#999933")) +
+   geom_label_repel(aes(label = Label), size = 3.2, force = 5, alpha = 0.8) +
+   facet_grid(.~condition) + xlab("Beta") + ylab("Probability of answers")
+```
+
+# By participants
+
+```{r}
+ss_betas <-  read.csv("../outputs/results_mm_participants.csv")
+ss_betas_fsm <- ss_betas %>% filter(condition %in% c("visible_beta_fsm", "hidden_beta_fsm", "hidden_beta_fsm_an"))
+```
+
+
+```{r}
+ss_betas <- ss_betas %>% filter(condition %in% c("visible_beta", "hidden_beta", "hidden_beta_an")) %>% 
+  group_by(participant_id, condition, fsm, task) %>% summarize(p_max = max(sum_log_p), 
+                                                              p_zero = sum(sum_log_p[beta == 0.00]), 
+                                                              p_boost = p_max - p_zero, 
+                                                              beta_max = beta[sum_log_p == p_max]) %>% ungroup() %>% 
+  mutate(condition = as.factor(condition), task = as.factor(task))
+
+ss_betas <- ss_betas %>% 
+  mutate(condition = fct_relevel(condition, c("visible_beta", "hidden_beta", "hidden_beta_an")), 
+         condition = fct_recode(condition, "Visible" = "visible_beta", "Hidden" = "hidden_beta", "Hidden AN" = "hidden_beta_an"), 
+         task = fct_recode(task, "Control" = 'control', "Prediction" = "prediction", "Explanation" = "explanation"))
+
+ggplot(ss_betas %>% filter(fsm == "hard"), aes(task, beta_max, fill = task)) + geom_boxplot(
+    width = 0.3,
+    # removing outliers
+    outlier.color = NA,
+    alpha = 0.5
+  )  + stat_dots(
+    # ploting on left side
+    side = "left",
+    # adjusting position
+    justification = 1.2,
+    # adjust grouping (binning) of observations
+    binwidth = 0.02
+  ) +  # Themes and Labels
+  theme_classic() +
+  labs(
+    y = "Max Beta", 
+    x = ""
+  )  + 
+  scale_y_continuous(limits = c(0, 0.5), breaks = c(0, 0.2, 0.4, 0.5)) +
+  scale_fill_manual(values = c("Prediction" = "#AA4499", "Explanation" = "#6699CC", "Control" = "#999933")) + 
+  facet_grid(.~condition) + coord_flip() +  theme(legend.position = "none", strip.text.x = element_text(size = 12), axis.text = element_text(size = 11))
+```
+
+```{r}
+# same for real fsm betas
+ss_betas_fsm <- ss_betas_fsm %>% group_by(participant_id, condition, fsm, task) %>% summarize(p_max = max(sum_log_p), 
+                                                              p_zero = sum(sum_log_p[beta == 0.00]), 
+                                                              p_boost = p_max - p_zero, 
+                                                              beta_max = beta[sum_log_p == p_max]) %>% ungroup() %>% 
+  mutate(condition = as.factor(condition), task = as.factor(task))
+ss_betas_fsm <- ss_betas_fsm %>% mutate(condition = fct_relevel(condition, c("visible_beta_fsm", "hidden_beta_fsm", "hidden_beta_fsm_an")), 
+         condition = fct_recode(condition, "Visible" = "visible_beta_fsm", "Hidden" = "hidden_beta_fsm", "Hidden AN" = "hidden_beta_fsm_an"), 
+         task = fct_recode(task, "Control" = 'control', "Prediction" = "prediction", "Explanation" = "explanation"))
+
+ggplot(ss_betas_fsm %>% filter(fsm == "hard"), aes(task, beta_max, fill = task)) + geom_boxplot(
+    width = 0.3,
+    # removing outliers
+    outlier.color = NA,
+    alpha = 0.5
+  )  + stat_dots(
+    # ploting on left side
+    side = "left",
+    # adjusting position
+    justification = 1.2,
+    # adjust grouping (binning) of observations
+    binwidth = 0.02
+  ) +  # Themes and Labels
+  theme_classic() +
+  labs(
+    y = "Max Beta", 
+    x = ""
+  )  + 
+  scale_y_continuous(limits = c(0, 4), breaks = c(0, 0.2, 0.4, 0.6, 0.8)) +
+  scale_fill_manual(values = c("Prediction" = "#AA4499", "Explanation" = "#6699CC", "Control" = "#999933")) + 
+  facet_grid(.~condition) + coord_flip() +  theme(legend.position = "none", strip.text.x = element_text(size = 12), axis.text = element_text(size = 11))
+
+```
+
+```{r}
+ggplot(ss_betas %>% filter(fsm == "hard"), aes(beta_max, fill = task)) +
+  geom_histogram(binwidth = 0.05) + facet_grid(task~condition)
+```
+
+
+```{r}
+ss_betas <-  read.csv("../outputs/results_expected_accuracy.csv") %>% mutate(across(participant_id:condition, as.factor)) %>% 
+  mutate(task = fct_recode(task,  "Prediction" = "prediction", "Control" = 'control', "Explanation" = "explanation"), 
+         task = fct_relevel(task,  c("Prediction","Control","Explanation")))
+
+ss_betas_fsm <- ss_betas %>% filter(condition %in% c("visible_fsm", "hidden_fsm", "hidden_an_fsm")) 
+
+ss_betas_mm <- ss_betas %>% filter(condition %in% c("visible_mm", "hidden_mm", "hidden_an_mm"))
+ss_betas_mm <- ss_betas_mm %>% 
+  mutate(condition = fct_relevel(condition, c("visible_mm", "hidden_mm", "hidden_an_mm")), 
+         condition = fct_recode(condition, "Visible" = "visible_mm", "Hidden" = "hidden_mm", "Hidden AN" = "hidden_an_mm"))
+
+ss_betas_fsm <- ss_betas_fsm %>% 
+  mutate(condition = fct_relevel(condition, c("visible_fsm", "hidden_fsm", "hidden_an_fsm")), 
+         condition = fct_recode(condition, "Visible" = "visible_fsm", "Hidden" = "hidden_fsm", "Hidden AN" = "hidden_an_fsm"))
+```
+
+
+```{r}
+ggplot(ss_betas_mm, aes(task, p_correct_r3, fill = task)) + geom_boxplot(
+    width = 0.3,
+    # removing outliers
+    outlier.color = NA,
+    alpha = 0.5
+  )   +  # Themes and Labels
+  theme_classic() +
+  labs(
+    y = "Expected Accuracy", 
+    x = ""
+  )  + 
+  #scale_y_continuous(limits = c(0, 0.5), breaks = c(0, 0.2, 0.4, 0.5)) +
+  scale_fill_manual(values = c("Prediction" = "#AA4499", "Explanation" = "#6699CC", "Control" = "#999933")) + 
+  facet_grid(fsm~condition) + coord_flip() +  theme(legend.position = "none", strip.text.x = element_text(size = 12), axis.text = element_text(size = 11))
+```
+
+```{r}
+plot1 <- ggplot(ss_betas_mm, aes(task, p_correct_r3, fill = task)) +
+  geom_boxplot(
+    width = 0.5,
+    # removing outliers
+    outlier.color = NA,
+    alpha = 0.5, 
+    position = position_dodge(width=0.8)
+  )   +  # Themes and Labels
+  labs(fill = "",
+    y = "Predicted Accuracy", 
+    x = ""
+  )  + 
+  geom_hline(yintercept = 0.5, color = "black", size = 10, alpha = 0.2)+
+  geom_point(position = position_jitterdodge(dodge.width = 0.8, jitter.width = 0.4), size = 1, alpha = 0.2)+ 
+  scale_fill_manual(values = c("Prediction" = "#AA4499","Control" = "#999933", "Explanation" = "#6699CC")) + 
+  facet_grid(fsm~condition, labeller = labeller(fsm = c(easy = "Easy", hard = "Hard")))  + theme_classic()+  theme(legend.position = "top", strip.text.x = element_text(size = 12), axis.text = element_text(size = 12), text = element_text(size = 15), axis.text.x=element_blank(),axis.ticks.x=element_blank())
+plot1
+ggsave(filename = "fig-accuracy-mm.png", plot = plot1, path = '../outputs/', device = "png")
+```
