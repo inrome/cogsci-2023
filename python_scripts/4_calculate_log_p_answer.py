@@ -112,7 +112,7 @@ for participant_id in sample.keys():
     for row_index, row in max_beta.iteritems():
         condition = row_index
         max_beta = row
-        R_i = 3
+        R_i = 2
         predicted_accuracy[condition] = (math.e ** (R_i * max_beta)) / (
                     math.e ** (R_i * max_beta) + math.e ** (-1 * R_i * max_beta))
 

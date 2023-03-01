@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 # load data from csv file
-results = pd.read_csv('../outputs/2023-01-28_all_trials_with_Ri.csv', sep=",")
+results = pd.read_csv('../outputs/2023-01-28_all_trials_with_Ri_v2.csv', sep=",")
 
 # select only the relevant columns for the analysis: participant_id, fsm_type, trial_type, task,
 # R_i_mm_eps_0.1, R_i_mm_am_eps_0.1, response_correct

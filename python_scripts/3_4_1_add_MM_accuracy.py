@@ -1,4 +1,5 @@
 import pickle
+import numpy as np
 
 with open('../outputs/trials_with_Ri.pickle', 'rb') as f:
     sample = pickle.load(f)
@@ -12,6 +13,7 @@ for participant_id in sample.keys():
     for index, row in trials_vis.iterrows():
         option_1_p = row['option_1_p_mm']
         option_2_p = row['option_2_p_mm']
+
         response = row['response']
 
         if option_1_p != option_2_p:
@@ -90,3 +92,5 @@ for participant_id in sample.keys():
 # save data
 with open('../outputs/trials_with_Ri.pickle', 'wb') as f:
     pickle.dump(sample, f)
+
+#
