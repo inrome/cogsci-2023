@@ -1,0 +1,94 @@
+---
+title: "Strategy analysis"
+output: html_notebook
+---
+
+
+```{r}
+library(tidyverse)
+ss <- read.csv("../data_clean/2023-01-28_participants_clean_an-exp1_n-91.csv")
+ts_p <- read.csv("../data_clean/2023-01-28_test_prediction_clean_an-exp1_n-91.csv")
+ts_c <- read.csv("../data_clean/2023-01-28_test_control_clean_an-exp1_n-91.csv")
+ts_e <- read.csv("../data_clean/2023-01-28_test_explanation_clean_an-exp1_n-91.csv")
+
+tmp_p <- ts_p %>% select(participant_id, fsm_type, trial_type, response_correct, trial_id) %>% mutate(task = "Prediction")
+tmp_c <- ts_c %>% select(participant_id, fsm_type, trial_type, response_correct, trial_id) %>% mutate(task = "Control")
+tmp_e <- ts_e %>% select(participant_id, fsm_type, trial_type, response_correct, trial_id) %>% mutate(task = "Explanation")
+
+ts <- tmp_p %>% bind_rows(tmp_c) %>% bind_rows(tmp_e) %>% mutate(response_correct = as.integer(response_correct))
+
+ss_raw <- ss
+```
+
+Add accuracy (overall, visible, hidden) to ss dataframe
+```{r}
+ts_acc <- ts %>% group_by(participant_id) %>% summarise(n_trials = n(), 
+                                                        accuracy = mean(response_correct), 
+                                                        accuracy_vis = mean(response_correct[trial_type == "visible"]), 
+                                                        accuracy_hid = mean(response_correct[trial_type == "hidden"]))  
+ss <- ss_raw %>% left_join(ts_acc)
+```
+
+Accuracy per condition
+```{r}
+tmp <- ss %>% select(participant_id, study_fsm, study_task, accuracy_vis, accuracy_hid) %>% pivot_longer(cols = accuracy_vis:accuracy_hid, 
+                                                                                                         names_to = "trials_type", 
+                                                                                                         values_to = "accuracy") %>% 
+  mutate(trials_type = ifelse(trials_type == "accuracy_vis", "Visible", "Hidden"))
+tmp$trials_type <- factor(tmp$trials_type, levels = c("Visible", "Hidden"))
+tmp$study_task <- factor(tmp$study_task, levels = c("prediction", "control", "explanation"), labels = c("Prediction", "Control", "Explanation"))
+
+plot1 <- ggplot(tmp, aes(study_task, accuracy, fill = study_task)) +
+  geom_boxplot(
+    width = 0.5,
+    # removing outliers
+    outlier.color = NA,
+    alpha = 0.5, 
+    position = position_dodge(width=0.8)
+  )   + 
+  geom_hline(yintercept = 0.5, color = "black", linetype = "dashed",size = 1, alpha = 0.8) +
+  geom_point(position = position_jitterdodge(dodge.width = 0.8, jitter.width = 0.6), size = 1.3, alpha = 0.2) + 
+  scale_fill_manual(values = c("Prediction" = "#AA4499","Control" = "#999933", "Explanation" = "#6699CC")) + 
+  facet_grid(study_fsm~trials_type, labeller = labeller(study_fsm = c(easy = "Easy", hard = "Hard")))  + theme_classic()+  theme(legend.position = "top", strip.text.x = element_text(size = 12), axis.text = element_text(size = 12), text = element_text(size = 15)) + 
+   labs(fill = "",
+    y = "Actual Accuracy", 
+    x = "Type of Trials"
+  ) 
+plot1
+```
+Accuracy vs Estimated accuracy 
+```{r}
+correlations <- {}
+for(task in unique(ss$study_task)) {
+  cor <- cor.test(ss$q_estimate[ss$study_task == task], ss$accuracy[ss$study_task == task], method = "spearman",exact = F )
+  correlations[task] = paste0("r_s = ", round(cor$estimate, 2), "; p = ",round(cor$p.value, 3))
+}
+correlations
+```
+
+```{r}
+correlations_vis <- {}
+for(task in unique(ss$study_task)) {
+  cor <- cor.test(ss$q_estimate[ss$study_task == task], ss$accuracy_vis[ss$study_task == task], method = "spearman",exact = F )
+  correlations_vis[task] =  paste0("r_s = ", round(cor$estimate, 2), "; p = ",round(cor$p.value, 3))
+}
+correlations_vis
+```
+
+```{r}
+
+correlations_hid <- {}
+for(task in unique(ss$study_task)) {
+  cor <- cor.test(ss$q_estimate[ss$study_task == task], ss$accuracy_hid[ss$study_task == task], method = "spearman",exact = F )
+  correlations_hid[task] =  paste0("r_s = ", round(cor$estimate, 2), "; p = ",round(cor$p.value, 3))
+}
+correlations_hid
+```
+
+
+# Strategies
+```{r}
+ss %>% group_by(study_task, q_strategy) %>% summarise(median_acc = median(accuracy), n = n()) %>% arrange(study_task, desc(n)) %>% filter(!is.na(q_strategy))
+```
+
+

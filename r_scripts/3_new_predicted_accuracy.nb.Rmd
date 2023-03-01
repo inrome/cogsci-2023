@@ -1,0 +1,63 @@
+---
+title: "Figures with correct R_i and MM"
+output: html_notebook
+---
+
+```{r}
+ss_betas <-  read.csv("../outputs/predicted_accuracy_v2.csv") %>% relocate(fsm) %>% mutate(across(fsm:condition, as.factor)) %>% 
+  mutate(task = fct_recode(task,  "Prediction" = "prediction", "Control" = 'control', "Explanation" = "explanation"), 
+         task = fct_relevel(task,  c("Prediction","Control","Explanation")))
+
+ss_betas <- ss_betas %>% 
+  mutate(condition = fct_relevel(condition, c("visible", "hidden", "hidden_an")), 
+         condition = fct_recode(condition, "Visible" = "visible", "Hidden" = "hidden", "Hidden AN" = "hidden_an"))
+
+ss_betas <- ss_betas %>% 
+  mutate(fsm = fct_relevel(fsm, c("easy", "hard")), 
+         fsm = fct_recode(fsm, "Easy" = "easy", "Hard" = "hard"))
+```
+
+```{r}
+plot1 <- ggplot(ss_betas, aes(task, predicted_accuracy, fill = task)) +
+  geom_boxplot(
+    width = 0.5,
+    # removing outliers
+    outlier.color = NA,
+    alpha = 0.5, 
+    position = position_dodge(width=0.8)
+  )   +  # Themes and Labels
+  labs(fill = "",
+    y = "Predicted Accuracy", 
+    x = ""
+  )  + 
+  geom_hline(yintercept = 0.5, color = "black", size = 10, alpha = 0.2)+
+  geom_point(position = position_jitterdodge(dodge.width = 0.8, jitter.width = 0.4), size = 1, alpha = 0.2)+ 
+  scale_fill_manual(values = c("Prediction" = "#AA4499","Control" = "#999933", "Explanation" = "#6699CC")) + 
+  facet_grid(fsm~condition)  + theme_classic()+  theme(legend.position = "top", strip.text.x = element_text(size = 12), axis.text = element_text(size = 12), text = element_text(size = 15), axis.text.x=element_blank(),axis.ticks.x=element_blank())
+plot1
+```
+```{r}
+plot1 <- ggplot(ss_betas, aes(task, mm_accuracy, fill = task)) +
+  geom_boxplot(
+    width = 0.5,
+    # removing outliers
+    outlier.color = NA,
+    alpha = 0.5, 
+    position = position_dodge(width=0.8)
+  )   +  # Themes and Labels
+  labs(fill = "",
+    y = "Mental Model Accuracy", 
+    x = ""
+  )  + 
+  geom_hline(yintercept = 0.5, color = "black", size = 10, alpha = 0.2)+
+  geom_point(position = position_jitterdodge(dodge.width = 0.8, jitter.width = 0.4), size = 1, alpha = 0.2)+ 
+  scale_fill_manual(values = c("Prediction" = "#AA4499","Control" = "#999933", "Explanation" = "#6699CC")) + 
+  facet_grid(fsm~condition)  + theme_classic()+  theme(legend.position = "top", strip.text.x = element_text(size = 12), axis.text = element_text(size = 12), text = element_text(size = 15), axis.text.x=element_blank(),axis.ticks.x=element_blank())
+plot1
+```
+```{r}
+number_na <- ss_betas %>% group_by(participant_id, fsm, task, condition) %>% summarise(sum_na = sum(count_nan)) %>% filter(sum_na > 4) %>% group_by(fsm, task, condition) %>% count() %>% arrange(desc(n))
+number_na
+```
+
+
