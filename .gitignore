@@ -7,3 +7,6 @@
 .idea/cogsci-2023.iml
 .idea/modules.xml
 .Rproj.user
+.Rhistory
+.RData
+r_scripts/3_new_predicted_accuracy.nb.nb.html
