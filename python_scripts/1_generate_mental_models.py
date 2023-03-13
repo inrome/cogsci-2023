@@ -5,7 +5,7 @@ import itertools
 
 # Load data from pickle file
 with open('../data_clean/imported_clean_data.pickle', 'rb') as f:
-    participants, transitions, trials_learning, trials_prediction, trials_control, trials_explanation = pickle.load(f)
+    participants, trials_learning, trials_prediction, trials_control, trials_explanation = pickle.load(f)
 # %%
 mental_models = {}
 states = [0, 1, 2, 3]

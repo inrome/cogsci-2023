@@ -136,11 +136,10 @@ def calculate_probabilities(trials_vis_in, trials_hid_in, MM, task):
 
 # load data
 with open('../data_clean/imported_clean_data.pickle', 'rb') as f:
-    participants, transitions, trials_learning, trials_prediction, trials_control, trials_explanation = pickle.load(f)
+    participants, trials_learning, trials_prediction, trials_control, trials_explanation = pickle.load(f)
 
 with open('../outputs/mental_models.pickle', 'rb') as f:
     MM = pickle.load(f)
-
 
 # %%
 
