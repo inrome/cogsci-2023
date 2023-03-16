@@ -8,8 +8,9 @@
 
 ## Procedure
 The experiment consisted of **learning** and **test** phases followed by a post-experimental questionnaire.
-- Learning phase (45 interactions): participants freely interacted with the chatbot so that they could explain, predict, and control its behavior. Participants respond by choosing one of the two emoji icons (corresponding to "a", or "b") and instantly get the next reaction of the chatbot, which depends on their input and the previous message from the chatbot.
-- Test phase (20 questions — 10 hidden and 10 visible): Participants were randomly assigned to one of three test conditions that assessed their ability to predict, explain, or control the chatbot's behavior.
+- Learning phase (45 interactions): participants freely interacted with the chatbot with a goal defined in general terms (to be able to explain, predict, and control the chatbot's behavior). Participants respond by choosing one of the two emoji icons (corresponding to "a", or "b") and instantly get the next reaction of the chatbot (emoji assigned to states 0, 1, 2, or 3), which depends on their input and the previous message from the chatbot.
+Chatbot's behavior was defined with either "**easy**" or "**hard**" finite-state machine that differed in the number of deterministic or probabilistic transitions.
+- - Test phase (20 questions — 10 hidden and 10 visible): Participants were randomly assigned to one of three test conditions that assessed their ability to predict, explain, or control the chatbot's behavior.
 - Questionnaire: 1) _How many correct answers do you think you got in the test task?_ (multiple-choice question). 2) _How did you come up with most of the anwers during the test phase?_ (multiple-choice question). 3) _Imagine that your friend is taking part in the study and want to excel in the test task. What would you advise?_ (text input)
 
 ## Data analysis Python scripts
