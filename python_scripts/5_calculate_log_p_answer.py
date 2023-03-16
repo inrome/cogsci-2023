@@ -83,7 +83,7 @@ imported_participants = imported_data[0]
 # %%
 
 beta_range = np.arange(0, 1.1, 0.1)  # set range of beta values
-
+#participant_id = 69  # set participant id
 for participant_id in sample.keys():
     trials_vis = sample[participant_id]['trials_vis']
     trials_hid = sample[participant_id]['trials_hid']
@@ -111,10 +111,10 @@ for participant_id in sample.keys():
     predicted_accuracy = {}
     for row_index, row in max_beta.iteritems():
         condition = row_index
-        max_beta = row
+        max_beta_condition = row
         R_i = 2
-        predicted_accuracy[condition] = (math.e ** (R_i * max_beta)) / (
-                    math.e ** (R_i * max_beta) + math.e ** (-1 * R_i * max_beta))
+        predicted_accuracy[condition] = (math.e ** (R_i * max_beta_condition)) / (
+                    math.e ** (R_i * max_beta_condition) + math.e ** (-1 * R_i * max_beta_condition))
 
     # if trials_vis['response_correct_mm'] has more than 2 non-NaN values, calculate mean
     mm_accuracy = {}
@@ -179,4 +179,4 @@ for participant_id in sample.keys():
 
     results_all = results_all.append(results, ignore_index=True)
 
-results_all.to_csv('../outputs/predicted_accuracy_v2.csv', index=False)
+results_all.to_csv('../outputs/predicted_accuracy.csv', index=False)

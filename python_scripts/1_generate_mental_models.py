@@ -16,11 +16,10 @@ for participant_id in trials_learning.participant_id.unique():
     df_learning = trials_learning[trials_learning['participant_id'] == participant_id]
 
     fsm = {}  # set up empty dictionary to store mental model
-
     for state in states:
         fsm[state] = {}
-        fsm[state]["a"] = np.array([1/4.0, 1/4.0, 1/4.0, 1/4.0])
-        fsm[state]["b"] = np.array([1/4.0, 1/4.0, 1/4.0, 1/4.0])
+        for response in responses:
+            fsm[state][response] = np.zeros(4)
 
     for index, row in df_learning.iterrows():
         state_current = int(row['state_current'])
@@ -29,10 +28,12 @@ for participant_id in trials_learning.participant_id.unique():
         fsm[state_current][response_current][state_next] += 1
 
     for state in states:
-        tot_a = fsm[state]["a"].sum() * 1.0
-        fsm[state]["a"] = [x/tot_a for x in fsm[state]["a"]]
-        tot_b = fsm[state]["b"].sum() * 1.0
-        fsm[state]["b"] = [x/tot_b for x in fsm[state]["b"]]
+        for response in responses:
+            tot = fsm[state][response].sum() * 1.0
+            if tot > 0:
+                fsm[state][response] = [x/tot for x in fsm[state][response]]
+            else:
+                fsm[state][response] = [1/4, 1/4, 1/4, 1/4]
 
     mental_models[participant_id] = fsm
 #%%

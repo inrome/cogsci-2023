@@ -7,7 +7,7 @@ import numpy as np
 #%%
 
 # load data from csv
-results = pd.read_csv('../outputs/2023-03-01_all_trials_with_Ri_v2.csv', sep=",")
+results = pd.read_csv('../outputs/all_trials_with_Ri.csv', sep=",")
 
 #%%
 # based on R_i_mm_esp_0.1, create a new column with 5 bins (0-0.5, 0.51-1, 1.01-1.5, 1.51-2, 2.01-2.5)

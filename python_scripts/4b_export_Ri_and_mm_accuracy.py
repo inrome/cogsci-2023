@@ -14,4 +14,4 @@ for participant_id in sample.keys():
     results = pd.concat([results, trials])
 
 #%%
-results.to_csv('../outputs/2023-03-01_all_trials_with_Ri_v2.csv', sep=',', index=False)
+results.to_csv('../outputs/all_trials_with_Ri.csv', sep=',', index=False)
