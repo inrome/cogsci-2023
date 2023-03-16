@@ -5,7 +5,7 @@ import numpy as np
 # export mental models to csv for participants 22, 78 and 69
 
 # load mental models
-with open('../../outputs/mental_models.pickle', 'rb') as f:
+with open('../outputs/mental_models.pickle', 'rb') as f:
     mental_models = pickle.load(f)
 
 for participant_id in [22, 78, 69]:
@@ -23,7 +23,7 @@ for participant_id in [22, 78, 69]:
 #%%
 # export test trials for participants 22, 78 and 69
 # load data from pickle file
-with open('../../outputs/trials_with_Ri.pickle', 'rb') as f:
+with open('../outputs/trials_with_Ri.pickle', 'rb') as f:
     sample = pickle.load(f)
 
 for participant_id in [22, 78, 69]:
@@ -35,7 +35,7 @@ for participant_id in [22, 78, 69]:
 #%%
 # export max beta for participants 22, 78 and 69
 # load data from pickle file
-with open('../../outputs/trials_with_max_beta.pickle', 'rb') as f:
+with open('../outputs/trials_with_max_beta.pickle', 'rb') as f:
     sample = pickle.load(f)
 
 print(sample[22]['max_beta'])
