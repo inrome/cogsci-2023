@@ -16,14 +16,12 @@ for participant_id in trials_learning.participant_id.unique():
     df_learning = trials_learning[trials_learning['participant_id'] == participant_id]
 
     fsm = {}  # set up priors
-    alpha = 0.001 # smoothing parameter
-    k = 4 # number of states
-    ratio = alpha / k # ratio of prior probability
+    alpha = 0.001 # pseudocount
 
     for state in states:
         fsm[state] = {}
         for response in responses:
-            fsm[state][response] = np.array([ratio] * 4) # sets prior probabilities
+            fsm[state][response] = np.array([alpha] * 4) # sets prior probabilities
 
     for index, row in df_learning.iterrows():
         state_current = int(row['state_current'])

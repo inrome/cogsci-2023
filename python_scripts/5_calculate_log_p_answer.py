@@ -82,7 +82,7 @@ with open('../data_clean/imported_clean_data.pickle', 'rb') as f:
 imported_participants = imported_data[0]
 # %%
 
-beta_range = np.arange(0, 1.1, 0.1)  # set range of beta values
+beta_range = np.arange(0, 1.1, 0.01)  # set range of beta values
 #participant_id = 69  # set participant id
 for participant_id in sample.keys():
     trials_vis = sample[participant_id]['trials_vis']
