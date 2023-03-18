@@ -22,11 +22,14 @@ g = sns.catplot(data=ss_betas, x="task", y="predicted_accuracy", hue="difficulty
                 legend=False)
 
 # Customize plot
-g.set_axis_labels("Test condition", "Predicted Accuracy")
+g.set_axis_labels("", "Predicted Accuracy")
 g.set_titles(col_template="{col_name}", row_template="{row_name}")
+# make text of row titles bold
+for ax, title in zip(g.axes.flat, ["Visible", "Hidden (Normative)", "Hidden (Alternative Neglect)"]):
+    ax.set_title(title, fontweight="bold")
 
 g.despine(left=True)
-plt.legend(loc='upper left', bbox_to_anchor=(-0.8, 1.3), ncol=2, title="Finite-State Machine Difficulty")
+plt.legend(loc='upper left', bbox_to_anchor=(-2.1, 1.3), ncol=2, title="Finite-State Machine:")
 
 plt.savefig("../outputs/predicted_accuracy_alpha0.png", dpi=300, bbox_inches="tight")
 plt.show()
